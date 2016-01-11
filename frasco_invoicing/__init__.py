@@ -1,4 +1,4 @@
-from frasco import Feature, action, signal, current_app
+from frasco import Feature, action, signal, current_app, command
 from frasco_models import as_transaction, save_model, ref
 import datetime
 from contextlib import contextmanager
@@ -99,3 +99,8 @@ class InvoicingFeature(Feature):
             invoice_tax=invoice.tax_amount,
             invoice_tax_rate=invoice.tax_rate,
             **kwargs)
+
+    @command('send_email')
+    def send_email_command(self, invoice_id, email=None):
+        invoice = current_app.features.models.query(self.model).get(invoice_id)
+        self.send_email(email or invoice.email, invoice)
