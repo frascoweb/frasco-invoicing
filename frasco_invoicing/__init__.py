@@ -89,10 +89,13 @@ class InvoicingFeature(Feature):
     def send_email(self, email, invoice, **kwargs):
         items = []
         for item in invoice.items:
-            items.append((item.description, item.amount))
+            items.append((item.description, item.quantity, item.amount))
         current_app.features.emails.send(email, 'invoice.html',
+            invoice=invoice,
             invoice_date=invoice.issued_at,
             invoice_items=items,
             invoice_currency=invoice.currency.upper(),
             invoice_total=invoice.total,
+            invoice_tax=invoice.tax_amount,
+            invoice_tax_rate=invoice.tax_rate,
             **kwargs)
