@@ -1,5 +1,5 @@
 from frasco import Feature, action, signal, current_app, command
-from frasco_models import as_transaction, save_model, ref
+from frasco_models import as_transaction, save_model, ref, transaction
 import datetime
 from contextlib import contextmanager
 
@@ -78,10 +78,10 @@ class InvoicingFeature(Feature):
         yield invoice
         self.save(invoice)
 
-    @as_transaction
     def save(self, invoice):
-        self.invoice_issueing_signal.send(invoice)
-        save_model(invoice)
+        with transaction():
+            self.invoice_issueing_signal.send(invoice)
+            save_model(invoice)
         self.invoice_issued_signal.send(invoice)
         if invoice.email and self.options['send_email']:
             self.send_email(invoice.email, invoice)
